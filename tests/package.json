@@ -1,0 +1,12 @@
+{
+  "name": "cluspro-rank-tests",
+  "private": true,
+  "type": "module",
+  "description": "Test-only package. Kept out of the repo root so the site deploys as pure static files.",
+  "scripts": {
+    "test": "node test-parser.mjs && node test-app.mjs && node test-import.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^26.0.0"
+  }
+}

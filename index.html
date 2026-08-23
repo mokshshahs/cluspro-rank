@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClusPro Rank — compare ClusPro docking jobs side by side</title>
+<meta name="description" content="Collect results from many ClusPro docking jobs into one sortable, filterable comparison table, ranked by cluster size the way ClusPro ranks them. Runs entirely in your browser.">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>%F0%9F%A7%AC</text></svg>">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-row">
+    <div class="brand">
+      <h1>ClusPro Rank</h1>
+      <p class="tagline">Many ClusPro jobs, one sortable table. Runs entirely in this browser tab.</p>
+    </div>
+    <nav class="nav" id="main-nav" aria-label="Sections">
+      <a href="#/home"   data-view="home">How to use</a>
+      <a href="#/paste"  data-view="paste">Paste</a>
+      <a href="#/manual" data-view="manual">Manual</a>
+      <a href="#/csv"    data-view="csv">CSV</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ══ Home ══════════════════════════════════════════════════════ -->
+  <section id="view-home" class="view">
+
+    <div class="hero">
+      <h2>Compare docking jobs without the split screen</h2>
+      <p>
+        ClusPro runs every candidate complex as its own job, on its own results page, with no way to see them
+        side by side &mdash; so people copy scores into a spreadsheet by hand. This does that part for you:
+        collect each job's cluster table once, then sort, filter, and export one comparison table.
+      </p>
+      <p class="hero-note">Nothing is uploaded. Everything stays in this tab, and closing it clears the table.</p>
+    </div>
+
+    <div class="method-cards">
+      <a class="method-card" href="#/paste">
+        <span class="method-step">Fastest</span>
+        <strong>Paste a cluster table</strong>
+        <span>Copy the Cluster Scores table from a ClusPro results page. Every cluster is kept.</span>
+      </a>
+      <a class="method-card" href="#/manual">
+        <span class="method-step">No table?</span>
+        <strong>Type values in</strong>
+        <span>For jobs where you only have the numbers, not the full cluster table.</span>
+      </a>
+      <a class="method-card" href="#/csv">
+        <span class="method-step">Bulk</span>
+        <strong>Import a CSV</strong>
+        <span>Load a spreadsheet you already have, or reload a table you exported earlier.</span>
+      </a>
+    </div>
+
+    <aside class="note">
+      <strong>Ranked by cluster size, not by score.</strong>
+      ClusPro ranks models by how many docked structures fall into a cluster &mdash; the native site
+      tends to sit in the widest energy funnel &mdash; and its documentation
+      <em>strongly discourages</em> judging models by the weighted scores, which exist to filter ~10<sup>9</sup>
+      sampled positions down to 1,000 rather than to rank those final 1,000. The scores are not binding
+      affinities and are not meant for comparison between different jobs. This tool therefore sorts on
+      <strong>Members</strong> by default and keeps the scores as secondary context.
+      <a href="https://cluspro.org/help.php" target="_blank" rel="noopener">ClusPro documentation &rarr;</a>
+    </aside>
+
+    <div class="help-body">
+      <h3>1. Find the cluster table on ClusPro</h3>
+      <p>
+        On a job's results page, each coefficient set &mdash; <em>Balanced</em>,
+        <em>Electrostatic-favored</em>, <em>Hydrophobic-favored</em>, <em>VdW+Elec</em> &mdash; has its own tab,
+        and under it a <strong>Cluster Scores</strong> table. Select that table (from its
+        <code>Cluster&nbsp;&nbsp;Members&nbsp;&nbsp;Representative&nbsp;&nbsp;Weighted Score</code> header row down
+        through the last cluster) and copy it.
+      </p>
+
+      <h3>2. Pick the matching tab here <em>before</em> you paste</h3>
+      <p class="help-warn">
+        The copied text does <strong>not</strong> say which coefficient set it came from &mdash; that label lives
+        only in ClusPro's page tabs, outside the selection. So this app cannot detect it, and does not try.
+        <strong>The tab you have open on the Paste page is the only thing that decides where a pasted table is
+        filed.</strong> Paste a Balanced table with the Electrostatic-favored tab open and it will be filed as
+        Electrostatic-favored.
+      </p>
+
+      <h3>3. What a valid paste looks like</h3>
+      <pre class="help-sample">Cluster    Members    Representative    Weighted Score
+0    123    Center    -716.1
+Lowest Energy    -770.2
+1    114    Center    -754.7
+Lowest Energy    -872.7
+2    107    Center    -620.8
+Lowest Energy    -716.9</pre>
+      <p>
+        The header row is optional; numbered cluster lines are not. Each <code>Lowest Energy</code> line carries
+        no cluster number of its own and is attached to the cluster named above it. Every cluster is stored, not
+        just the first. Anything that doesn't match this shape is rejected with an error rather than
+        half-imported &mdash; paste <strong>one coefficient set at a time</strong>.
+      </p>
+
+      <h3>4. PDB ID, tags, and building a job across tabs</h3>
+      <p>
+        Each paste needs a <strong>PDB ID</strong>; the complex/model label and tag are optional. The tag is free
+        text &mdash; mutation, construct, batch, run number, whatever you group by. Pasting a second coefficient
+        set for a PDB ID already in the table <strong>merges into that job's row</strong> instead of creating a
+        duplicate, so you can work through one tab for every job, then switch tabs and do the next set.
+        A job needs data in only one set to be valid; the table shows columns for whichever sets have data.
+      </p>
+
+      <h3>5. If you paste on the wrong tab</h3>
+      <p>
+        Pasting a set a job already has <strong>replaces</strong> it, and the app has no way to know that wasn't
+        what you meant. Replacements are flagged in amber rather than green, and an
+        <strong>&#8617;&nbsp;Undo</strong> button appears above the table naming exactly what it will reverse
+        (<em>&ldquo;Undo: Replaced Balanced for 1LYZ&rdquo;</em>). <kbd>Ctrl</kbd>/<kbd>&#8984;</kbd>&#8202;+&#8202;<kbd>Z</kbd>
+        does the same, except while you're typing in a field. It is <strong>one step only</strong> &mdash; the next
+        change replaces what's undoable. At high volume, still export to CSV every 10&ndash;20 jobs as a checkpoint.
+      </p>
+
+      <h3>6. Choosing the headline score</h3>
+      <p>
+        Above the results table, <strong>Headline score</strong> picks which number from a job's stored cluster
+        table appears in the row: cluster&nbsp;0's Lowest Energy (the default), cluster&nbsp;0's Center, a
+        specific cluster number, or the global minimum across every cluster. Changing it recomputes every row
+        instantly &mdash; nothing is re-pasted. To override one row, expand it with <strong>&#9656;</strong> and
+        click any value to pin it. Rules match ClusPro's cluster <em>number</em>, so a table copied from partway
+        down has no cluster&nbsp;0 and shows &ldquo;&mdash;&rdquo; rather than passing off another cluster's score.
+      </p>
+
+      <h3>7. Getting the table out</h3>
+      <p>
+        <strong>Export table</strong> writes exactly what's on screen &mdash; current coefficient set, sort,
+        filter, and top-N &mdash; for dropping into a paper or poster. <strong>Export all sets</strong> writes
+        every row and set, ignoring the filter, as a reload-able backup. There is no autosave: a refresh clears
+        everything, so export before you close the tab.
+      </p>
+    </div>
+  </section>
+
+  <!-- ══ Paste ═════════════════════════════════════════════════════ -->
+  <section id="view-paste" class="view" hidden>
+    <div class="view-head">
+      <h2>Paste a cluster table</h2>
+      <p>Copy the Cluster Scores table from one coefficient set, pick that set below, and add it.</p>
+    </div>
+
+    <div class="card card-entry">
+      <div class="tabs" id="entry-tabs" role="tablist" aria-label="Coefficient set this paste belongs to"></div>
+
+      <p class="tab-context">
+        Pasting files this table under <strong id="entry-set-name">Balanced</strong>.
+        ClusPro's copied table doesn't name its coefficient set &mdash; this tab does.
+      </p>
+
+      <textarea id="paste-input" rows="9" spellcheck="false"
+        placeholder="Cluster    Members    Representative    Weighted Score&#10;0    123    Center    -716.1&#10;Lowest Energy    -770.2&#10;1    114    Center    -754.7&#10;Lowest Energy    -872.7"></textarea>
+
+      <div class="field-grid">
+        <label class="field">
+          <span>PDB ID <em>required</em></span>
+          <input type="text" id="t-pdb" placeholder="8WUL" maxlength="16">
+        </label>
+        <label class="field">
+          <span>Complex / model label</span>
+          <input type="text" id="t-complex" placeholder="complex 3">
+        </label>
+        <label class="field">
+          <span>Tag <em>any label you like</em></span>
+          <input type="text" id="t-tag" list="tag-list" placeholder="G12V, apo, run-2&hellip;">
+        </label>
+      </div>
+
+      <div class="row-actions">
+        <button type="button" id="add-paste-btn" class="btn btn-primary">Add to Balanced</button>
+        <button type="button" id="paste-clear-btn" class="btn btn-ghost">Clear</button>
+      </div>
+      <p id="paste-status" class="status" role="status"></p>
+    </div>
+
+    <div class="table-slot"></div>
+  </section>
+
+  <!-- ══ Manual ════════════════════════════════════════════════════ -->
+  <section id="view-manual" class="view" hidden>
+    <div class="view-head">
+      <h2>Manual entry</h2>
+      <p>For a job where you have the numbers but not the full cluster table. Fill any cells you have.</p>
+    </div>
+
+    <div class="card">
+      <form id="job-form" autocomplete="off">
+        <div class="field-grid">
+          <label class="field">
+            <span>PDB ID <em>required</em></span>
+            <input type="text" id="f-pdb" placeholder="8WUL" maxlength="16" required>
+          </label>
+          <label class="field">
+            <span>Complex / model label</span>
+            <input type="text" id="f-complex" placeholder="complex 3">
+          </label>
+          <label class="field">
+            <span>Tag</span>
+            <input type="text" id="f-tag" list="tag-list" placeholder="G12V, apo&hellip;">
+            <datalist id="tag-list"></datalist>
+          </label>
+        </div>
+
+        <fieldset class="scores">
+          <legend>Per coefficient set <em>at least one value</em></legend>
+          <div class="table-scroll entry-scroll">
+            <table class="entry-table">
+              <thead>
+                <tr>
+                  <th scope="col">Coefficient set</th>
+                  <th scope="col">Cluster</th>
+                  <th scope="col">Members</th>
+                  <th scope="col">Center score</th>
+                  <th scope="col">Lowest energy</th>
+                </tr>
+              </thead>
+              <tbody id="set-inputs"></tbody>
+            </table>
+          </div>
+        </fieldset>
+
+        <div class="row-actions">
+          <button type="submit" class="btn btn-primary">Add job to table</button>
+          <button type="reset" class="btn btn-ghost">Reset form</button>
+        </div>
+        <p id="form-status" class="status" role="status"></p>
+      </form>
+    </div>
+
+    <div class="table-slot"></div>
+  </section>
+
+  <!-- ══ CSV ═══════════════════════════════════════════════════════ -->
+  <section id="view-csv" class="view" hidden>
+    <div class="view-head">
+      <h2>Import a CSV</h2>
+      <p>Load a spreadsheet, or reload a table you exported from here earlier.</p>
+    </div>
+
+    <div class="card">
+      <p class="hint">
+        Columns: <code>pdb_id</code>, <code>complex_label</code>, <code>tag</code>, then per set
+        <code>balanced_cluster</code>, <code>balanced_members</code>, <code>balanced_center</code>,
+        <code>balanced_lowest</code> (same for <code>electrostatic_favored</code>,
+        <code>hydrophobic_favored</code>, <code>vdw_elec</code>). Header names are matched loosely, a bare
+        <code>balanced</code> column is read as its center score, and unrecognised columns are ignored and
+        reported. A long format with a <code>coefficient_set</code> column also works.
+      </p>
+      <div class="row-actions">
+        <label class="btn btn-secondary file-btn">
+          Choose CSV file&hellip;
+          <input type="file" id="csv-input" accept=".csv,text/csv" hidden>
+        </label>
+        <button type="button" id="template-btn" class="btn btn-ghost">Download blank template</button>
+      </div>
+      <p id="csv-status" class="status" role="status"></p>
+    </div>
+
+    <div class="table-slot"></div>
+  </section>
+
+  <!-- ══ The shared results table — moved into the active view ═════ -->
+  <section id="results-section" class="card table-card">
+    <div class="coeff-bar">
+      <span class="coeff-label">Show coefficient set</span>
+      <div class="segmented" id="coeff-group" role="group" aria-label="Coefficient set to display"></div>
+    </div>
+
+    <div class="rule-bar">
+      <label class="rule-label" for="headline-rule">Headline score</label>
+      <select id="headline-rule">
+        <option value="c0lowest">Cluster 0 &mdash; Lowest Energy</option>
+        <option value="c0center">Cluster 0 &mdash; Center</option>
+        <option value="clusterN">Specific cluster &mdash; Lowest Energy</option>
+        <option value="globalmin">Global minimum &mdash; best score in any cluster</option>
+      </select>
+      <label class="rule-n" id="rule-n-wrap" hidden>
+        cluster <input type="number" id="rule-n" min="0" step="1" value="1">
+      </label>
+      <span class="rule-note" id="rule-note"></span>
+    </div>
+
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <label class="search">
+          <span class="visually-hidden">Filter by PDB ID or tag</span>
+          <input type="search" id="filter-input" placeholder="Filter by PDB ID, label, or tag&hellip;">
+        </label>
+        <div class="segmented" id="topn-group" role="group" aria-label="Show top N rows">
+          <button type="button" class="seg" data-topn="5">Top 5</button>
+          <button type="button" class="seg" data-topn="10">Top 10</button>
+          <button type="button" class="seg is-active" data-topn="all">All</button>
+        </div>
+      </div>
+      <div class="toolbar-right">
+        <button type="button" id="undo-btn" class="btn btn-undo" hidden></button>
+        <button type="button" id="export-btn" class="btn btn-secondary">Export table</button>
+        <button type="button" id="export-all-btn" class="btn btn-ghost">Export all sets</button>
+        <button type="button" id="clear-demo-btn" class="btn btn-ghost">Clear demo data</button>
+        <button type="button" id="clear-all-btn" class="btn btn-ghost btn-danger">Clear all rows</button>
+      </div>
+    </div>
+
+    <p id="table-status" class="status" role="status"></p>
+
+    <p class="table-meta">
+      <span id="row-count"></span>
+      <span class="legend"><span class="best-chip">&#9733; best</span> = top value in the current filter</span>
+    </p>
+
+    <p id="coeff-hint" class="hint" hidden></p>
+
+    <div class="table-scroll">
+      <table id="results-table">
+        <thead id="results-head"></thead>
+        <tbody id="results-body"></tbody>
+      </table>
+    </div>
+
+    <p id="empty-state" class="empty" hidden></p>
+  </section>
+
+  <footer class="site-footer">
+    <p>
+      <strong>Members</strong> is cluster population &mdash; ClusPro's own ranking criterion, so bigger is better
+      and it sorts descending. <strong>Center</strong> and <strong>Lowest Energy</strong> are PIPER weighted
+      scores; they are energies, so more negative sorts first. Each coefficient set is clustered independently,
+      so cluster&nbsp;0 in one set is not the same structure as cluster&nbsp;0 in another.
+      Not affiliated with ClusPro or Boston University.
+    </p>
+  </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

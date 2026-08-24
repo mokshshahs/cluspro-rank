@@ -1,5 +1,7 @@
 # ClusPro Rank
 
+Website URL: https://newsrista.github.io/cluspro-rank/
+
 A single-page tool that turns manually-collected [ClusPro](https://cluspro.org) docking
 results into one sortable, filterable comparison table.
 

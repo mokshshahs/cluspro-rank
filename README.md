@@ -1,5 +1,7 @@
 # ClusPro Rank
 
+<img width="1123" height="553" alt="Screenshot 2026-08-23 at 6 45 21 PM" src="https://github.com/user-attachments/assets/675f1cdd-04da-4948-a4ac-d1ff5a98cf4c" />
+
 Website URL: https://mokshshahs.github.io/cluspro-rank 
 
 A single-page tool that turns manually-collected [ClusPro](https://cluspro.org) docking

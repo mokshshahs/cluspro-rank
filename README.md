@@ -222,7 +222,7 @@ served or needed at runtime.
 index.html   markup
 styles.css   styling, light + dark via prefers-color-scheme
 app.js       parsing, state, ranking, rendering, CSV in/out
-tests/       jsdom test suites (dev only)
+tests/       jsdom test suites (dev only) 
 ```
 
 PapaParse 5.4.1 is loaded from cdnjs for CSV import. If it fails to load, import says so and
